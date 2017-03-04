@@ -46,7 +46,6 @@ UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 	FString path = FPaths::GameDir() + szfilename;
 	doc.LoadFile(TCHAR_TO_ANSI(*path));
 	if (doc.Error()) return pRetXmlToCsv;
-
 	const char* WORKSHEET	= "Worksheet";
 	const char* TABLE		= "Table";
 	const char* ROW			= "Row";

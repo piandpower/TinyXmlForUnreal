@@ -984,18 +984,28 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
             break;
         }
 
-        //XMLDeclaration* decl = node->ToDeclaration();
-        //if ( decl ) {
-        //        // A declaration can only be the first child of a document.
-        //        // Set error, if document already has children.
-        //        if ( !_document->NoChildren() ) {
-        //                _document->SetError( XML_ERROR_PARSING_DECLARATION, decl->Value(), 0);
-        //                DeleteNode( decl );
-        //                break;
-        //        }
-        //}
+        XMLDeclaration* decl = node->ToDeclaration();
+		if (decl)
+		{
+			// A declaration can only be the first child of a document.
+			// Set error, if document already has children.
+			if (!_document->NoChildren()) {
+				static const char* excelHeader = { "mso-application progid=\"Excel.Sheet\"" };
+				static const int excelHeaderLen = 36;
 
-
+				if (XMLUtil::StringEqual(decl->Value(), excelHeader, excelHeaderLen))
+				{
+					DeleteNode(decl);
+					continue;
+				}
+				else
+				{
+					_document->SetError(XML_ERROR_PARSING_DECLARATION, decl->Value(), 0);
+					DeleteNode(decl);
+					break;
+				}
+			}
+		}
 
         XMLElement* ele = node->ToElement();
         if ( ele ) {
