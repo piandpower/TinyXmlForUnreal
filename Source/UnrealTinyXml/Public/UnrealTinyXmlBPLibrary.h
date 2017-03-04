@@ -28,11 +28,7 @@ class UUnrealTinyXmlBPLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
 
-	/**
-	* Create a instance of TinyXmlDocument which can load xml,or close xml.
-	*/
-	UFUNCTION(BlueprintCallable, Category = "luochuanyuewu|TinyXml", Meta = (DisplayName = "Create New XmlDocument"))
-		static UUnrealTinyXmlDocument* NewXmlDocument();
+
 
 
 };

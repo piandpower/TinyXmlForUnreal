@@ -26,42 +26,42 @@ public:
 	/**
 	* Gets next (Step) node in a list of nodes, can return NULL.if exceeded,return last one.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
 		UUnrealTinyXmlNode* GetNextNode(int Step = 1);
 	/**
 	* Gets previous (Step) node in a list of nodes, can return NULL.if exceeded,return last one.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
 		UUnrealTinyXmlNode* GetPreviousNode(int Step = 1);
 
 	/**
 	* Gets the next node in a list of nodes, can return NULL.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
 		UUnrealTinyXmlNode* GetParentNode();
 
 	/**
 	* Gets the value of the node.
 	*/
-	UFUNCTION(BlueprintPure, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintPure, Category = "UnrealTinyXml|Node")
 		FString GetNodeValue();
 
 	/**
 	* Gets the first child of this node which can be iterated into with GetNextNode, can return NULL.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
 		UUnrealTinyXmlNode* GetFirstChildNode(const int SearchDeep = 1);
 
 	/**
 	* Find first(or "loc") child  node of this node which has the same name as "NameToSearch",Will return Null if can't find.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
 		UUnrealTinyXmlNode* FindChildNodeByName(const FString& NameToSearch, const int loc = 1);
 
 	/**
 	* Gets the name of current node, can return NULL.
 	*/
-	UFUNCTION(BlueprintPure, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintPure, Category = "UnrealTinyXml|Node")
 		FString GetNodeName();
 
 	/**
@@ -69,6 +69,6 @@ public:
 		for the attribute of that name, or null if none
 		exists
 	*/
-	UFUNCTION(BlueprintPure, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintPure, Category = "UnrealTinyXml|Node")
 		FString GetAttributeValue(const FString& AttributeName);
 };

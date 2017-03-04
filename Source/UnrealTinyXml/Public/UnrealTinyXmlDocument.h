@@ -20,23 +20,27 @@ public:
 
 	bool IsValid();
 
-
+	/**
+	* Create a instance of TinyXmlDocument which can load xml,or close xml.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml", Meta = (DisplayName = "Create New XmlDocument"))
+		static UUnrealTinyXmlDocument* NewXmlDocument();
 	/**
 	* Load xml file from disk, return ture if load successful, or it will be false.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml")
 		bool LoadXmlFie(const FString& File);
 
 	/**
 	* Get the root node of current loaded xml file, returns NULL if it can't be parsed.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml")
 		UUnrealTinyXmlNode* GetRootNode();
 
 	/**
 	* Clear the document that has this node, resetting it to the initial state(All nodes of this document will become null!).
 	*/
-	UFUNCTION(BlueprintCallable, Category = "luochuanyuewu|TinyXml")
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml")
 		void Clear();
 
 };

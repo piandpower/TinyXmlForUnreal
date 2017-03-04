@@ -10,10 +10,18 @@ bool UUnrealTinyXmlDocument::IsValid()
 	return this->XmlFilePtr != nullptr;
 }
 
+UUnrealTinyXmlDocument* UUnrealTinyXmlDocument::NewXmlDocument()
+{
+	//创建Node
+	UUnrealTinyXmlDocument* Instance = NewObject<UUnrealTinyXmlDocument>();
+	Instance->XmlFilePtr = new tinyxml2::XMLDocument();;
+	return Instance;
+}
+
 bool UUnrealTinyXmlDocument::LoadXmlFie(const FString& File)
 {
 	//获取Xml文件路径
-	FString XmlPath = FPaths::GameContentDir() + "XmlConfig/" + File;
+	FString XmlPath = FPaths::GameContentDir() + File;
 
 	//检查文件是否存在
 	if (!(FPaths::FileExists(XmlPath)))

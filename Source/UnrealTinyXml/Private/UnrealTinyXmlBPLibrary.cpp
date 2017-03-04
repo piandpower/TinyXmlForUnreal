@@ -8,11 +8,3 @@ UUnrealTinyXmlBPLibrary::UUnrealTinyXmlBPLibrary(const FObjectInitializer& Objec
 {
 
 }
-UUnrealTinyXmlDocument* UUnrealTinyXmlBPLibrary::NewXmlDocument()
-{
-	//´´½¨Node
-	UUnrealTinyXmlDocument* Instance = NewObject<UUnrealTinyXmlDocument>();
-	Instance->XmlFilePtr = new tinyxml2::XMLDocument();;
-	return Instance;
-}
-
