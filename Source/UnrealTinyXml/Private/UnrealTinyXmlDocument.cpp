@@ -14,7 +14,7 @@ UUnrealTinyXmlDocument* UUnrealTinyXmlDocument::NewXmlDocument()
 {
 	//创建Node
 	UUnrealTinyXmlDocument* Instance = NewObject<UUnrealTinyXmlDocument>();
-	Instance->XmlFilePtr = new tinyxml2::XMLDocument();;
+	Instance->XmlFilePtr = new tinyxml2::XMLDocument();
 	return Instance;
 }
 
@@ -67,6 +67,11 @@ UUnrealTinyXmlNode* UUnrealTinyXmlDocument::GetRootNode()
 void UUnrealTinyXmlDocument::Clear()
 {
 	this->XmlFilePtr->Clear();
+	this->XmlFilePtr = nullptr;
+	if (this->IsValidLowLevel())
+	{
+		this->ConditionalBeginDestroy();
+	}
 	UE_LOG(LogTemp, Warning, TEXT("清理完毕"));
 	return;
 }

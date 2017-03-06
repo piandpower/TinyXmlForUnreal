@@ -17,7 +17,6 @@ class UNREALTINYXML_API UUnrealTinyXmlDocument : public UObject
 	
 public:
 	XMLDocument* XmlFilePtr; // 指向Xml文档对象的指针
-
 	bool IsValid();
 
 	/**
