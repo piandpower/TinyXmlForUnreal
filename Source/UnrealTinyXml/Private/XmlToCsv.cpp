@@ -3,7 +3,6 @@
 #include "UnrealTinyXmlPrivatePCH.h"
 #include "XmlToCsv.h"
 #include "tinyxml2.h"
-#include <string>
 
 using namespace tinyxml2;
 
@@ -40,30 +39,14 @@ UXmlToCsv::~UXmlToCsv()
 {
 }
 
-void TCharToChar(const FString& inStr, std::string& outStr)
-{
-#ifdef _UNICODE
-	const int BuffMax = 1024;
-	char convertTemp[BuffMax];
-	int nLen = WideCharToMultiByte(CP_ACP, 0, *inStr, -1, NULL, 0, NULL, NULL);
-	WideCharToMultiByte(CP_ACP, 0, *inStr, -1, convertTemp, nLen, 0, 0);
-	outStr = convertTemp;
-#else   
-	outStr = *inStr;
-#endif  
-}
-
 UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 {
 	UXmlToCsv* pRetXmlToCsv = nullptr;
 	XMLDocument doc;
 	FString path = FPaths::GameContentDir() + szfilename;
 	
-	std::string cstr;
-	TCharToChar(path, cstr);
-	
 	//∂¡»°Xml.
-	doc.LoadFile(cstr.c_str());
+	doc.LoadFile(TCHAR_TO_ANSI(*path));
 	if (doc.Error()) return pRetXmlToCsv;
 
 	//≥£¡ø
