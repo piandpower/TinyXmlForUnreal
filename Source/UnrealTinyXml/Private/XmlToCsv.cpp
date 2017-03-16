@@ -4,7 +4,6 @@
 #include "XmlToCsv.h"
 #include "tinyxml2.h"
 #include <string>
-
 using namespace tinyxml2;
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -40,18 +39,18 @@ UXmlToCsv::~UXmlToCsv()
 {
 }
 
-void TCharToChar(const FString& inStr, std::string& outStr)
-{
-#ifdef _UNICODE
-	const int BuffMax = 1024;
-	char convertTemp[BuffMax];
-	int nLen = WideCharToMultiByte(CP_ACP, 0, *inStr, -1, NULL, 0, NULL, NULL);
-	WideCharToMultiByte(CP_ACP, 0, *inStr, -1, convertTemp, nLen, 0, 0);
-	outStr = convertTemp;
-#else   
-	outStr = *inStr;
-#endif  
-}
+//void TCharToChar(const FString& inStr, std::string& outStr)
+//{
+//#ifdef _UNICODE
+//	const int BuffMax = 1024;
+//	char convertTemp[BuffMax];
+//	int nLen = WideCharToMultiByte(CP_ACP, 0, *inStr, -1, NULL, 0, NULL, NULL);
+//	WideCharToMultiByte(CP_ACP, 0, *inStr, -1, convertTemp, nLen, 0, 0);
+//	outStr = convertTemp;
+//#else   
+//	outStr = *inStr;
+//#endif  
+//}
 
 UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 {
@@ -59,12 +58,29 @@ UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 	XMLDocument doc;
 	FString path = FPaths::GameContentDir() + szfilename;
 	
-	std::string cstr;
-	TCharToChar(path, cstr);
+	//std::string cstr;
+	//TCharToChar(path, cstr);
 	
+	//检查文件是否存在
+	if (!(FPaths::FileExists(path)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("要解析的Xml文件不存在，确认路径正确"));
+		return nullptr;
+	}
+
 	//读取Xml.
-	doc.LoadFile(cstr.c_str());
-	if (doc.Error()) return pRetXmlToCsv;
+	//doc.LoadFile(cstr.c_str());
+	//if (doc.Error()) return pRetXmlToCsv;
+
+	//读取文件
+	doc.LoadFile(TCHAR_TO_UTF8(*path));
+	//检测Xml文件解析是否包含错误
+	if (doc.Error())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Xml文件加载错误,错误描述:%s"), UTF8_TO_TCHAR(doc.ErrorName()));
+		return nullptr;
+	}
+
 
 	//常量
 	const char* WORKSHEET	= "Worksheet";
