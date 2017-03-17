@@ -238,7 +238,7 @@ bool UXmlToCsv::LocationByTwo(const FString& szfield1, const FString& szfield2, 
 		for (int npos = 1; npos < mnCurrentRow; npos++)
 		{
 			if (mvDatas[npos*mnCol + *pnfind1] == sztmp1
-				&& mvDatas[npos*mnCol + *pnfind1] == sztmp2)
+				&& mvDatas[npos*mnCol + *pnfind2] == sztmp2)
 			{
 				mnCurrentRow = npos;
 				return true;
