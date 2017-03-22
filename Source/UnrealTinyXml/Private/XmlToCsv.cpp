@@ -4,6 +4,7 @@
 #include "XmlToCsv.h"
 #include "tinyxml2.h"
 #include <string>
+
 using namespace tinyxml2;
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -28,10 +29,88 @@ const FString& UCsvField::AsStr()
 	return *mpStr;
 }
 
+void UCsvField::SplitToStr(const FString& Delimiter, TArray<FString>& out)
+{
+	out.Empty();
+
+	FString sRight = *mpStr;
+
+	while (sRight.Len())
+	{
+		int32 InPos = sRight.Find(Delimiter);
+		if (InPos > 0)
+		{
+			out.Add(sRight.Left(InPos));
+			sRight = sRight.Mid(InPos + Delimiter.Len());
+		}
+		else if (InPos == 0)
+		{
+			sRight = sRight.Mid(InPos + Delimiter.Len());
+		}
+		else
+		{
+			out.Add(sRight);
+		}
+	}
+}
+
+void UCsvField::SplitToInt(const FString& Delimiter, TArray<int32>& out)
+{
+	out.Empty();
+
+	FString sRight = *mpStr;
+
+	while (sRight.Len())
+	{
+		int32 InPos = sRight.Find(Delimiter);
+		if (InPos > 0)
+		{
+			out.Add(FCString::Atoi(*(sRight.Left(InPos))));
+			sRight = sRight.Mid(InPos + Delimiter.Len());
+		}
+		else if (InPos == 0)
+		{
+			sRight = sRight.Mid(InPos + Delimiter.Len());
+		}
+		else
+		{
+			out.Add(FCString::Atoi(*sRight));
+		}
+	}
+}
+
+void UCsvField::SplitToFloat(const FString& Delimiter, TArray<float>& out)
+{
+	out.Empty();
+
+	FString sRight = *mpStr;
+
+	while (sRight.Len())
+	{
+		int32 InPos = sRight.Find(Delimiter);
+		if (InPos > 0)
+		{
+			out.Add(FCString::Atof(*(sRight.Left(InPos))));
+			sRight = sRight.Mid(InPos + Delimiter.Len());
+		}
+		else if (InPos == 0)
+		{
+			sRight = sRight.Mid(InPos + Delimiter.Len());
+		}
+		else
+		{
+			out.Add(FCString::Atof(*sRight));
+		}
+	}
+}
+
 //-----------------------------------------------------------------------------------------------------------------
 
+UCsvField*	UXmlToCsv::mField = nullptr;
+TMap<FString, UXmlToCsv*> UXmlToCsv::mmXmlToCsvs;
+
 UXmlToCsv::UXmlToCsv()
-	: mnCurrentRow(0), mnCol(0), mnRow(0), mField(nullptr)
+	: mnCurrentRow(0), mnCol(0), mnRow(0)
 {
 }
 
@@ -39,147 +118,148 @@ UXmlToCsv::~UXmlToCsv()
 {
 }
 
-//void TCharToChar(const FString& inStr, std::string& outStr)
-//{
-//#ifdef _UNICODE
-//	const int BuffMax = 1024;
-//	char convertTemp[BuffMax];
-//	int nLen = WideCharToMultiByte(CP_ACP, 0, *inStr, -1, NULL, 0, NULL, NULL);
-//	WideCharToMultiByte(CP_ACP, 0, *inStr, -1, convertTemp, nLen, 0, 0);
-//	outStr = convertTemp;
-//#else   
-//	outStr = *inStr;
-//#endif  
-//}
+void TCharToChar(const FString& inStr, std::string& outStr)
+{
+#ifdef _UNICODE
+	const int BuffMax = 1024;
+	char convertTemp[BuffMax];
+	int nLen = WideCharToMultiByte(CP_ACP, 0, *inStr, -1, NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, *inStr, -1, convertTemp, nLen, 0, 0);
+	outStr = convertTemp;
+#else   
+	outStr = *inStr;
+#endif  
+}
 
 UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 {
 	UXmlToCsv* pRetXmlToCsv = nullptr;
-	XMLDocument doc;
-	FString path = FPaths::GameContentDir() + szfilename;
-	
-	//std::string cstr;
-	//TCharToChar(path, cstr);
-	
-	//检查文件是否存在
-	if (!(FPaths::FileExists(path)))
+
+	UXmlToCsv** ppFind = mmXmlToCsvs.Find(szfilename);
+	if (ppFind)
+		pRetXmlToCsv = *ppFind;
+	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("要解析的Xml文件不存在，确认路径正确"));
-		return nullptr;
-	}
+		XMLDocument doc;
+		FString path = FPaths::GameContentDir() + szfilename;
 
-	//读取Xml.
-	//doc.LoadFile(cstr.c_str());
-	//if (doc.Error()) return pRetXmlToCsv;
+		std::string cstr;
+		TCharToChar(path, cstr);
 
-	//读取文件
-	doc.LoadFile(TCHAR_TO_UTF8(*path));
-	//检测Xml文件解析是否包含错误
-	if (doc.Error())
-	{
-		UE_LOG(LogTemp, Error, TEXT("Xml文件加载错误,错误描述:%s"), UTF8_TO_TCHAR(doc.ErrorName()));
-		return nullptr;
-	}
+		//读取Xml.
+		doc.LoadFile(cstr.c_str());
+		if (doc.Error()) return pRetXmlToCsv;
 
+		//常量
+		const char* WORKSHEET = "Worksheet";
+		const char* TABLE = "Table";
+		const char* ROW = "Row";
+		const char* CELL = "Cell";
+		const char* DATA = "Data";
 
-	//常量
-	const char* WORKSHEET	= "Worksheet";
-	const char* TABLE		= "Table";
-	const char* ROW			= "Row";
-	const char* CELL		= "Cell";
-	const char* DATA		= "Data";
+		//获取表元素
+		XMLElement* pTable = doc.RootElement()->FirstChildElement(WORKSHEET)->FirstChildElement(TABLE);
 
-	//获取表元素
-	XMLElement* pTable = doc.RootElement()->FirstChildElement(WORKSHEET)->FirstChildElement(TABLE);
+		//获取Excel行数
+		int nRow = 0;
 
-	//获取Excel行数
-	int nRow = 0;
-
-	for (XMLElement* pRow = pTable->FirstChildElement(ROW); pRow; pRow = pRow->NextSiblingElement(ROW))
-	{
-		nRow++;
-	}
-
-	//总数-1，忽略第一行中文字段名
-	nRow--;
-	if (nRow > 1)
-	{
-		//跳到Excel表第二行(英文字段名)
-		XMLElement* pRow = pTable->FirstChildElement(ROW);
-		pRow = pRow->NextSiblingElement(ROW);//为第二行
-		
-		//获取列数
-		int nCol = 0;
-
-		for (XMLElement* pCell = pRow->FirstChildElement(CELL); pCell; pCell = pCell->NextSiblingElement(CELL))
+		for (XMLElement* pRow = pTable->FirstChildElement(ROW); pRow; pRow = pRow->NextSiblingElement(ROW))
 		{
-			nCol++;
+			nRow++;
 		}
 
-		//保存行列数
-		pRetXmlToCsv = NewObject<UXmlToCsv>();
-		pRetXmlToCsv->mnCol = nCol;
-		pRetXmlToCsv->mnRow = nRow - 1;
-		//初始化数据数组
-		pRetXmlToCsv->mvDatas.Empty(nCol * nRow);
-		pRetXmlToCsv->mvDatas.AddDefaulted(nCol * nRow);
-
-		int ntmpRow = 0;
-		//从第二行开始遍历所有行,将每一行的所有列的数据存入mvDatas里
-		for (; pRow; pRow = pRow->NextSiblingElement(ROW))
+		//总数-1，忽略第一行中文字段名
+		nRow--;
+		if (nRow > 1)
 		{
-			int ntmpPos = 0;
+			//跳到Excel表第二行(英文字段名)
+			XMLElement* pRow = pTable->FirstChildElement(ROW);
+			pRow = pRow->NextSiblingElement(ROW);//为第二行
+
+												 //获取列数
+			int nCol = 0;
+
 			for (XMLElement* pCell = pRow->FirstChildElement(CELL); pCell; pCell = pCell->NextSiblingElement(CELL))
 			{
-				XMLElement* pData = pCell->FirstChildElement(DATA);
-				if (pData)
-					pRetXmlToCsv->mvDatas[ntmpRow*nCol + ntmpPos] = UTF8_TO_TCHAR(pData->GetText());
-				ntmpPos++;
-				if (ntmpPos > nCol) break;
+				nCol++;
 			}
-			ntmpRow++;
-			if (ntmpRow > nRow) break;
+
+			//保存行列数
+			pRetXmlToCsv = NewObject<UXmlToCsv>();
+			pRetXmlToCsv->AddToRoot();
+			pRetXmlToCsv->mnCol = nCol;
+			pRetXmlToCsv->mnRow = nRow - 1;
+			//初始化数据数组
+			pRetXmlToCsv->mvDatas.Empty(nCol * nRow);
+			pRetXmlToCsv->mvDatas.AddDefaulted(nCol * nRow);
+
+			int ntmpRow = 0;
+			//从第二行开始遍历所有行,将每一行的所有列的数据存入mvDatas里
+			for (; pRow; pRow = pRow->NextSiblingElement(ROW))
+			{
+				int ntmpPos = 0;
+				for (XMLElement* pCell = pRow->FirstChildElement(CELL); pCell; pCell = pCell->NextSiblingElement(CELL))
+				{
+					XMLElement* pData = pCell->FirstChildElement(DATA);
+					if (pData)
+						pRetXmlToCsv->mvDatas[ntmpRow*nCol + ntmpPos] = UTF8_TO_TCHAR(pData->GetText());
+					ntmpPos++;
+					if (ntmpPos > nCol) break;
+				}
+				ntmpRow++;
+				if (ntmpRow > nRow) break;
+			}
+
+			//Excel表第二行每一列加入字段列表
+			for (int i = 0; i < pRetXmlToCsv->mnCol; i++)
+			{
+				pRetXmlToCsv->mmFieldNames.Add(pRetXmlToCsv->mvDatas[i], i);
+			}
+
+			pRetXmlToCsv->mnCurrentRow = 1;
 		}
 
-		//Excel表第二行每一列加入字段列表
-		for (int i=0; i<pRetXmlToCsv->mnCol; i++)
-		{
-			pRetXmlToCsv->mmFieldNames.Add(pRetXmlToCsv->mvDatas[i], i);
-		}
+		doc.Clear();
 
-		pRetXmlToCsv->mnCurrentRow = 1;
-		pRetXmlToCsv->mField = NewObject<UCsvField>();
+		mmXmlToCsvs.Add(szfilename, pRetXmlToCsv);
+
+		UE_LOG(LogTemp, Warning, TEXT("行:%d"), pRetXmlToCsv->mnRow);
+		UE_LOG(LogTemp, Warning, TEXT("列:%d"), pRetXmlToCsv->mnCol);
 	}
-
-	doc.Clear();
-
-	UE_LOG(LogTemp, Warning, TEXT("行:%d"),pRetXmlToCsv->mnRow);
-	UE_LOG(LogTemp, Warning, TEXT("列:%d"), pRetXmlToCsv->mnCol);
+	
 	return pRetXmlToCsv;
 }
 
-void UXmlToCsv::Close()
+void UXmlToCsv::CloseXmlToCsv(const FString& szfilename)
 {
-	mmFieldNames.Empty();
-	mvDatas.Empty();
-
-	if (mField->IsValidLowLevel())
+	UXmlToCsv** ppFind = mmXmlToCsvs.Find(szfilename);
+	if (ppFind)
 	{
-		mField->ConditionalBeginDestroy();
-		mField = nullptr;
-	}
+		mmXmlToCsvs.Remove(szfilename);
+		UXmlToCsv* pFind = *ppFind;
+		pFind->mmFieldNames.Empty();
+		pFind->mvDatas.Empty();
 
-	if (this->IsValidLowLevel())
-	{
-		this->ConditionalBeginDestroy();
+		pFind->RemoveFromRoot();
+
+		if (pFind->IsValidLowLevel())
+		{
+			pFind->ConditionalBeginDestroy();
+		}
 	}
 }
 
 UCsvField* UXmlToCsv::FieldByName(const FString& szname)
 {
 	int32* pnfind = mmFieldNames.Find(szname);
-	if (pnfind == nullptr || mField == nullptr) return NULL;
+	if (pnfind == nullptr) return NULL;
 
+	if (mField == nullptr)
+	{
+		mField = NewObject<UCsvField>();
+		mField->AddToRoot();
+	}
+	
 	mField->Init(&(mvDatas[mnCurrentRow*mnCol + *pnfind]));
 	return mField;
 }
@@ -238,7 +318,7 @@ bool UXmlToCsv::LocationByTwo(const FString& szfield1, const FString& szfield2, 
 		for (int npos = 1; npos < mnCurrentRow; npos++)
 		{
 			if (mvDatas[npos*mnCol + *pnfind1] == sztmp1
-				&& mvDatas[npos*mnCol + *pnfind2] == sztmp2)
+				&& mvDatas[npos*mnCol + *pnfind1] == sztmp2)
 			{
 				mnCurrentRow = npos;
 				return true;

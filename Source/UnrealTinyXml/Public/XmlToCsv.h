@@ -20,6 +20,12 @@ public:
 		float AsFloat();
 	UFUNCTION(BlueprintPure, Category = "UnrealTinyXml|CSV")
 		const FString& AsStr();
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|CSV")
+		void SplitToStr(const FString& Delimiter, TArray<FString>& out);
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|CSV")
+		void SplitToInt(const FString& Delimiter, TArray<int32>& out);
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|CSV")
+		void SplitToFloat(const FString& Delimiter, TArray<float>& out);
 };
 
 UCLASS(BlueprintType)
@@ -31,9 +37,10 @@ private:
 	int32		mnCol;//列
 	int32		mnRow;//行
 	int32		mnCurrentRow;//当前行
-	UCsvField*	mField;//字段
 	TMap<FString, int32> mmFieldNames;//保存列名列表
 	TArray<FString>		 mvDatas;//存储实际数据
+	static UCsvField*	mField;//字段
+	static TMap<FString, UXmlToCsv*> mmXmlToCsvs;
 
 private:
 	UXmlToCsv();
@@ -50,7 +57,7 @@ public:
 	* Clear opened xml file.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|CSV")
-		void Close();
+		static void CloseXmlToCsv(const FString& szfilename);
 	/**
 	* Get the value of given field name of current row.
 	*/
