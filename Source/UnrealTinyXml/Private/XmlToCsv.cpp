@@ -50,6 +50,7 @@ void UCsvField::SplitToStr(const FString& Delimiter, TArray<FString>& out)
 		else
 		{
 			out.Add(sRight);
+			break;
 		}
 	}
 }
@@ -75,6 +76,7 @@ void UCsvField::SplitToInt(const FString& Delimiter, TArray<int32>& out)
 		else
 		{
 			out.Add(FCString::Atoi(*sRight));
+			break;
 		}
 	}
 }
@@ -100,6 +102,7 @@ void UCsvField::SplitToFloat(const FString& Delimiter, TArray<float>& out)
 		else
 		{
 			out.Add(FCString::Atof(*sRight));
+			break;
 		}
 	}
 }
