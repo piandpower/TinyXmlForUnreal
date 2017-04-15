@@ -29,11 +29,11 @@ const FString& UCsvField::AsStr()
 	return *mpStr;
 }
 
-void UCsvField::SplitToStr(const FString& Delimiter, TArray<FString>& out)
+void UCsvField::SplitToStr(const FString& Str, const FString& Delimiter, TArray<FString>& out)
 {
 	out.Empty();
 
-	FString sRight = *mpStr;
+	FString sRight = Str;
 
 	while (sRight.Len())
 	{
@@ -55,11 +55,11 @@ void UCsvField::SplitToStr(const FString& Delimiter, TArray<FString>& out)
 	}
 }
 
-void UCsvField::SplitToInt(const FString& Delimiter, TArray<int32>& out)
+void UCsvField::SplitToInt(const FString& Str, const FString& Delimiter, TArray<int32>& out)
 {
 	out.Empty();
 
-	FString sRight = *mpStr;
+	FString sRight = Str;
 
 	while (sRight.Len())
 	{
@@ -81,11 +81,11 @@ void UCsvField::SplitToInt(const FString& Delimiter, TArray<int32>& out)
 	}
 }
 
-void UCsvField::SplitToFloat(const FString& Delimiter, TArray<float>& out)
+void UCsvField::SplitToFloat(const FString& Str, const FString& Delimiter, TArray<float>& out)
 {
 	out.Empty();
 
-	FString sRight = *mpStr;
+	FString sRight = Str;
 
 	while (sRight.Len())
 	{
@@ -203,6 +203,11 @@ UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 				int ntmpPos = 0;
 				for (XMLElement* pCell = pRow->FirstChildElement(CELL); pCell; pCell = pCell->NextSiblingElement(CELL))
 				{
+					if (int newPos = pCell->IntAttribute("ss:Index"))
+					{
+						ntmpPos += newPos - ntmpPos - 1;
+					}
+					
 					XMLElement* pData = pCell->FirstChildElement(DATA);
 					if (pData)
 						pRetXmlToCsv->mvDatas[ntmpRow*nCol + ntmpPos] = UTF8_TO_TCHAR(pData->GetText());

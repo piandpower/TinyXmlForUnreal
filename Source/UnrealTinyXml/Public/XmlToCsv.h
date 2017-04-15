@@ -21,11 +21,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "UnrealTinyXml|CSV")
 		const FString& AsStr();
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|CSV")
-		void SplitToStr(const FString& Delimiter, TArray<FString>& out);
+		static void SplitToStr(const FString& Str, const FString& Delimiter, TArray<FString>& out);
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|CSV")
-		void SplitToInt(const FString& Delimiter, TArray<int32>& out);
+		static void SplitToInt(const FString& Str, const FString& Delimiter, TArray<int32>& out);
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|CSV")
-		void SplitToFloat(const FString& Delimiter, TArray<float>& out);
+		static void SplitToFloat(const FString& Str, const FString& Delimiter, TArray<float>& out);
 };
 
 UCLASS(BlueprintType)
