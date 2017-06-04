@@ -120,19 +120,19 @@ UXmlToCsv::UXmlToCsv()
 UXmlToCsv::~UXmlToCsv()
 {
 }
-
-void TCharToChar(const FString& inStr, std::string& outStr)
-{
-#ifdef _UNICODE
-	const int BuffMax = 1024;
-	char convertTemp[BuffMax];
-	int nLen = WideCharToMultiByte(CP_ACP, 0, *inStr, -1, NULL, 0, NULL, NULL);
-	WideCharToMultiByte(CP_ACP, 0, *inStr, -1, convertTemp, nLen, 0, 0);
-	outStr = convertTemp;
-#else   
-	outStr = *inStr;
-#endif  
-}
+//
+//void TCharToChar(const FString& inStr, std::string& outStr)
+//{
+//#ifdef _UNICODE
+//	const int BuffMax = 1024;
+//	char convertTemp[BuffMax];
+//	int nLen = WideCharToMultiByte(CP_ACP, 0, *inStr, -1, NULL, 0, NULL, NULL);
+//	WideCharToMultiByte(CP_ACP, 0, *inStr, -1, convertTemp, nLen, 0, 0);
+//	outStr = convertTemp;
+//#else   
+//	outStr = *inStr;
+//#endif  
+//}
 
 UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 {
@@ -146,11 +146,11 @@ UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 		XMLDocument doc;
 		FString path = FPaths::GameContentDir() + szfilename;
 
-		std::string cstr;
-		TCharToChar(path, cstr);
-
+		//std::string cstr;
+		//TCharToChar(path, cstr);
+		
 		//∂¡»°Xml.
-		doc.LoadFile(cstr.c_str());
+		doc.LoadFile(TCHAR_TO_UTF8(*path));
 		if (doc.Error()) return pRetXmlToCsv;
 
 		//≥£¡ø
