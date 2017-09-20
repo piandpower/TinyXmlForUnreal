@@ -1,5 +1,3 @@
-
-
 #include "UnrealTinyXmlPrivatePCH.h"
 #include "ExcelBasedXml.h"
 #include "tinyxml2.h"
@@ -123,9 +121,9 @@ UExcelBasedXml::~UExcelBasedXml()
 }
 
 
-void UExcelBasedXml::InitProperties(const FString& xmlRootDir)
+void UExcelBasedXml::InitProperties(const FString& rootDir)
 {
-	UExcelBasedXml::xmlRootDir = xmlRootDir;
+	UExcelBasedXml::xmlRootDir = rootDir;
 }
 
 UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
@@ -142,21 +140,17 @@ UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
 
 
 		
-		//读取Xml.
 		doc.LoadFile(TCHAR_TO_UTF8(*path));
 		if (doc.Error()) return pRetXmlToCsv;
 
-		//常量
 		const char* WORKSHEET = "Worksheet";
 		const char* TABLE = "Table";
 		const char* ROW = "Row";
 		const char* CELL = "Cell";
 		const char* DATA = "Data";
 
-		//获取表元素
 		XMLElement* pTable = doc.RootElement()->FirstChildElement(WORKSHEET)->FirstChildElement(TABLE);
 
-		//获取Excel行数
 		int nRow = 0;
 
 		for (XMLElement* pRow = pTable->FirstChildElement(ROW); pRow; pRow = pRow->NextSiblingElement(ROW))
@@ -182,12 +176,11 @@ UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
 			pRetXmlToCsv->mnCol = nCol;
 			//Fill rows(exclude first row which is field row.)
 			pRetXmlToCsv->mnRow = nRow - 1;
-			//初始化数据数组
+			//Init data array.
 			pRetXmlToCsv->mvDatas.Empty(nCol * nRow);
 			pRetXmlToCsv->mvDatas.AddDefaulted(nCol * nRow);
 
 			int ntmpRow = 0;
-			//从第二行开始遍历所有行,将每一行的所有列的数据存入mvDatas里
 			for (; pRow; pRow = pRow->NextSiblingElement(ROW))
 			{
 				int ntmpPos = 0;
@@ -208,7 +201,6 @@ UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
 				if (ntmpRow > nRow) break;
 			}
 
-			//Excel表第二行每一列加入字段列表
 			for (int i = 0; i < pRetXmlToCsv->mnCol; i++)
 			{
 				pRetXmlToCsv->mmFieldNames.Add(pRetXmlToCsv->mvDatas[i], i);
@@ -221,8 +213,6 @@ UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
 
 		mmTables.Add(szfilename, pRetXmlToCsv);
 
-		UE_LOG(LogTemp, Warning, TEXT("行:%d"), pRetXmlToCsv->mnRow);
-		UE_LOG(LogTemp, Warning, TEXT("列:%d"), pRetXmlToCsv->mnCol);
 	}
 	
 	return pRetXmlToCsv;
@@ -340,7 +330,6 @@ void UExcelBasedXml::SetCurrentRow(int32 nno)
 	else
 	{
 		mnCurrentRow = 1;
-		UE_LOG(LogTemp, Error, TEXT("设置的Xml当前行不合法,所以回到第一行."));
 	}
 }
 void UExcelBasedXml::First() { mnCurrentRow = 1; }
