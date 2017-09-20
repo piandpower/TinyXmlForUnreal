@@ -4,7 +4,7 @@ using UnrealBuildTool;
 
 public class UnrealTinyXml : ModuleRules
 {
-	public UnrealTinyXml(TargetInfo Target)
+	public UnrealTinyXml(ReadOnlyTargetRules Target):base(Target)
 	{
 		
 		PublicIncludePaths.AddRange(
