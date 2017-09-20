@@ -111,6 +111,7 @@ void UExcelField::SplitToFloat(const FString& Str, const FString& Delimiter, TAr
 
 UExcelField*	UExcelBasedXml::mField = nullptr;
 TMap<FString, UExcelBasedXml*> UExcelBasedXml::mmTables;
+FString UExcelBasedXml::xmlRootDir = FPaths::GameContentDir();
 
 UExcelBasedXml::UExcelBasedXml()
 	: mnCurrentRow(0), mnCol(0), mnRow(0)
@@ -120,19 +121,12 @@ UExcelBasedXml::UExcelBasedXml()
 UExcelBasedXml::~UExcelBasedXml()
 {
 }
-//
-//void TCharToChar(const FString& inStr, std::string& outStr)
-//{
-//#ifdef _UNICODE
-//	const int BuffMax = 1024;
-//	char convertTemp[BuffMax];
-//	int nLen = WideCharToMultiByte(CP_ACP, 0, *inStr, -1, NULL, 0, NULL, NULL);
-//	WideCharToMultiByte(CP_ACP, 0, *inStr, -1, convertTemp, nLen, 0, 0);
-//	outStr = convertTemp;
-//#else   
-//	outStr = *inStr;
-//#endif  
-//}
+
+
+void UExcelBasedXml::InitProperties(const FString& xmlRootDir)
+{
+	UExcelBasedXml::xmlRootDir = xmlRootDir;
+}
 
 UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
 {
@@ -146,8 +140,7 @@ UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
 		XMLDocument doc;
 		FString path = FPaths::GameContentDir() + szfilename;
 
-		//std::string cstr;
-		//TCharToChar(path, cstr);
+
 		
 		//读取Xml.
 		doc.LoadFile(TCHAR_TO_UTF8(*path));
@@ -171,15 +164,11 @@ UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
 			nRow++;
 		}
 
-		//总数-1，忽略第一行中文字段名
-		nRow--;
+
 		if (nRow > 1)
 		{
-			//跳到Excel表第二行(英文字段名)
 			XMLElement* pRow = pTable->FirstChildElement(ROW);
-			pRow = pRow->NextSiblingElement(ROW);//为第二行
 
-												 //获取列数
 			int nCol = 0;
 
 			for (XMLElement* pCell = pRow->FirstChildElement(CELL); pCell; pCell = pCell->NextSiblingElement(CELL))
@@ -187,10 +176,11 @@ UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
 				nCol++;
 			}
 
-			//保存行列数
 			pRetXmlToCsv = NewObject<UExcelBasedXml>();
+			//Add to root to prevent grab collection.
 			pRetXmlToCsv->AddToRoot();
 			pRetXmlToCsv->mnCol = nCol;
+			//Fill rows(exclude first row which is field row.)
 			pRetXmlToCsv->mnRow = nRow - 1;
 			//初始化数据数组
 			pRetXmlToCsv->mvDatas.Empty(nCol * nRow);

@@ -40,6 +40,8 @@ private:
 	TMap<FString, int32> mmFieldNames;
 	TArray<FString>		 mvDatas;
 	static UExcelField*	mField;
+	static FString	xmlRootDir;
+
 	static TMap<FString, UExcelBasedXml*> mmTables;
 
 private:
@@ -47,6 +49,12 @@ private:
 	virtual ~UExcelBasedXml();
 
 public:
+
+	/**
+	* Init xml table basic properties, such as xml file directory(default is content directory.)..
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|ExcelBasedXml")
+		static void InitProperties(const FString& xmlRootDir);
 
 	/**
 	* Open a Excel based xml file, must assign to an var, and must call close() after used.
