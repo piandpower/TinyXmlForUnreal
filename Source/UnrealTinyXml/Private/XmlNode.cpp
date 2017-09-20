@@ -1,35 +1,35 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UnrealTinyXmlPrivatePCH.h"
-#include "UnrealTinyXmlNode.h"
+#include "XmlNode.h"
 
 
 
 
-bool UUnrealTinyXmlNode::IsValid()
+bool UXmlNode::IsValid()
 {
 	return (XmlFile.IsValid()) && (Node != nullptr);
 }
 
-UUnrealTinyXmlNode* UUnrealTinyXmlNode::Create(TSharedPtr<XMLDocument> XmlFile, XMLNode* Node)
+UXmlNode* UXmlNode::Create(TSharedPtr<XMLDocument> XmlFile, XMLNode* Node)
 {
 	//创建Node
-	UUnrealTinyXmlNode* Instance = NewObject<UUnrealTinyXmlNode>();
+	UXmlNode* Instance = NewObject<UXmlNode>();
 	Instance->XmlFile = XmlFile;
 	Instance->Node = Node;
 	return Instance;
 }
 
-UUnrealTinyXmlNode* UUnrealTinyXmlNode::Create(TSharedPtr<XMLDocument> XmlFile, const XMLNode* Node)
+UXmlNode* UXmlNode::Create(TSharedPtr<XMLDocument> XmlFile, const XMLNode* Node)
 {
 	//创建Node
-	UUnrealTinyXmlNode* Instance = NewObject<UUnrealTinyXmlNode>();
+	UXmlNode* Instance = NewObject<UXmlNode>();
 	Instance->XmlFile = XmlFile;
 	Instance->Node = Node;
 	return Instance;
 }
 
-UUnrealTinyXmlNode* UUnrealTinyXmlNode::GetNextNode(int Step /*= 1*/)
+UXmlNode* UXmlNode::GetNextNode(int Step /*= 1*/)
 {
 	//检查错误
 	if (!IsValid() || Step <= 0)
@@ -52,14 +52,14 @@ UUnrealTinyXmlNode* UUnrealTinyXmlNode::GetNextNode(int Step /*= 1*/)
 				break;
 			NextNode = NextNode->NextSibling();
 		}
-		return UUnrealTinyXmlNode::Create(XmlFile, NextNode);
+		return UXmlNode::Create(XmlFile, NextNode);
 	}
 	else
-		return UUnrealTinyXmlNode::Create(XmlFile, NextNode);
+		return UXmlNode::Create(XmlFile, NextNode);
 }
 
 
-UUnrealTinyXmlNode* UUnrealTinyXmlNode::GetPreviousNode(int Step /*= 1*/)
+UXmlNode* UXmlNode::GetPreviousNode(int Step /*= 1*/)
 {
 	//检查错误
 	if (!IsValid() || Step <= 0)
@@ -81,13 +81,13 @@ UUnrealTinyXmlNode* UUnrealTinyXmlNode::GetPreviousNode(int Step /*= 1*/)
 				break;
 			NextNode = NextNode->PreviousSibling();
 		}
-		return UUnrealTinyXmlNode::Create(XmlFile, NextNode);
+		return UXmlNode::Create(XmlFile, NextNode);
 	}
 	else
-		return UUnrealTinyXmlNode::Create(XmlFile, NextNode);
+		return UXmlNode::Create(XmlFile, NextNode);
 }
 
-UUnrealTinyXmlNode* UUnrealTinyXmlNode::GetParentNode()
+UXmlNode* UXmlNode::GetParentNode()
 {
 	if (!IsValid())
 	{
@@ -99,10 +99,10 @@ UUnrealTinyXmlNode* UUnrealTinyXmlNode::GetParentNode()
 		return NULL;
 	}
 
-	return UUnrealTinyXmlNode::Create(XmlFile, ParentNode);
+	return UXmlNode::Create(XmlFile, ParentNode);
 }
 
-FString UUnrealTinyXmlNode::GetNodeValue()
+FString UXmlNode::GetNodeValue()
 {
 	if (!IsValid())
 	{
@@ -111,7 +111,7 @@ FString UUnrealTinyXmlNode::GetNodeValue()
 	return UTF8_TO_TCHAR(Node->ToElement()->GetText());
 }
 
-UUnrealTinyXmlNode* UUnrealTinyXmlNode::GetFirstChildNode(const int SearchDeep)
+UXmlNode* UXmlNode::GetFirstChildNode(const int SearchDeep)
 {
 	if (!IsValid())
 	{
@@ -129,10 +129,10 @@ UUnrealTinyXmlNode* UUnrealTinyXmlNode::GetFirstChildNode(const int SearchDeep)
 	{
 		return NULL;
 	}
-	return UUnrealTinyXmlNode::Create(XmlFile, FirstChild);
+	return UXmlNode::Create(XmlFile, FirstChild);
 }
 
-UUnrealTinyXmlNode* UUnrealTinyXmlNode::FindChildNodeByName(const FString& NameToSearch, const int loc)
+UXmlNode* UXmlNode::FindChildNodeByName(const FString& NameToSearch, const int loc)
 {
 	if (!IsValid())
 	{
@@ -150,7 +150,7 @@ UUnrealTinyXmlNode* UUnrealTinyXmlNode::FindChildNodeByName(const FString& NameT
 		{
 			counter++;
 			if (counter >= loc)
-				return UUnrealTinyXmlNode::Create(XmlFile, TempNode);
+				return UXmlNode::Create(XmlFile, TempNode);
 		}
 		TempNode = TempNode->NextSibling();
 	}
@@ -159,7 +159,7 @@ UUnrealTinyXmlNode* UUnrealTinyXmlNode::FindChildNodeByName(const FString& NameT
 
 }
 
-FString UUnrealTinyXmlNode::GetNodeName()
+FString UXmlNode::GetNodeName()
 {
 	if (!IsValid())
 	{
@@ -168,7 +168,7 @@ FString UUnrealTinyXmlNode::GetNodeName()
 	return UTF8_TO_TCHAR(Node->ToElement()->Name());
 }
 
-FString UUnrealTinyXmlNode::GetAttributeValue(const FString& AttributeName)
+FString UXmlNode::GetAttributeValue(const FString& AttributeName)
 {
 	if (!IsValid())
 	{

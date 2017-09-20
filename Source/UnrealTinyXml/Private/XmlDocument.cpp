@@ -1,24 +1,24 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UnrealTinyXmlPrivatePCH.h"
-#include "UnrealTinyXmlDocument.h"
+#include "XmlDocument.h"
 
 
 
-bool UUnrealTinyXmlDocument::IsValid()
+bool UXmlDocument::IsValid()
 {
 	return this->XmlFilePtr != nullptr;
 }
 
-UUnrealTinyXmlDocument* UUnrealTinyXmlDocument::NewXmlDocument()
+UXmlDocument* UXmlDocument::NewXmlDocument()
 {
 	//创建Node
-	UUnrealTinyXmlDocument* Instance = NewObject<UUnrealTinyXmlDocument>();
+	UXmlDocument* Instance = NewObject<UXmlDocument>();
 	Instance->XmlFilePtr = new tinyxml2::XMLDocument();
 	return Instance;
 }
 
-bool UUnrealTinyXmlDocument::LoadXmlFie(const FString& File)
+bool UXmlDocument::LoadXmlFie(const FString& File)
 {
 	//获取Xml文件路径
 	FString XmlPath = FPaths::GameContentDir() + File;
@@ -41,7 +41,7 @@ bool UUnrealTinyXmlDocument::LoadXmlFie(const FString& File)
 
 }
 
-UUnrealTinyXmlNode* UUnrealTinyXmlDocument::GetRootNode()
+UXmlNode* UXmlDocument::GetRootNode()
 {
 	if (!IsValid())
 	{
@@ -58,10 +58,10 @@ UUnrealTinyXmlNode* UUnrealTinyXmlDocument::GetRootNode()
 	}
 
 	TSharedPtr<XMLDocument> XmlFile = MakeShareable(XmlFilePtr);
-	return UUnrealTinyXmlNode::Create(XmlFile, RootNode);
+	return UXmlNode::Create(XmlFile, RootNode);
 }
 
-void UUnrealTinyXmlDocument::Clear()
+void UXmlDocument::Clear()
 {
 	this->XmlFilePtr->Clear();
 	this->XmlFilePtr = nullptr;

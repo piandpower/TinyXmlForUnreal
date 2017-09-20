@@ -1,7 +1,7 @@
 
 
 #include "UnrealTinyXmlPrivatePCH.h"
-#include "XmlToCsv.h"
+#include "ExcelBasedXml.h"
 #include "tinyxml2.h"
 #include <string>
 
@@ -9,27 +9,27 @@ using namespace tinyxml2;
 
 //-----------------------------------------------------------------------------------------------------------------
 
-bool UCsvField::AsBool()
+bool UExcelField::AsBool()
 {
 	return mpStr->ToBool();
 }
 
-int32 UCsvField::AsInt()
+int32 UExcelField::AsInt()
 {
 	return FCString::Atoi(**mpStr);
 }
 
-float UCsvField::AsFloat()
+float UExcelField::AsFloat()
 {
 	return FCString::Atof(**mpStr);
 }
 
-const FString& UCsvField::AsStr()
+const FString& UExcelField::AsStr()
 {
 	return *mpStr;
 }
 
-void UCsvField::SplitToStr(const FString& Str, const FString& Delimiter, TArray<FString>& out)
+void UExcelField::SplitToStr(const FString& Str, const FString& Delimiter, TArray<FString>& out)
 {
 	out.Empty();
 
@@ -55,7 +55,7 @@ void UCsvField::SplitToStr(const FString& Str, const FString& Delimiter, TArray<
 	}
 }
 
-void UCsvField::SplitToInt(const FString& Str, const FString& Delimiter, TArray<int32>& out)
+void UExcelField::SplitToInt(const FString& Str, const FString& Delimiter, TArray<int32>& out)
 {
 	out.Empty();
 
@@ -81,7 +81,7 @@ void UCsvField::SplitToInt(const FString& Str, const FString& Delimiter, TArray<
 	}
 }
 
-void UCsvField::SplitToFloat(const FString& Str, const FString& Delimiter, TArray<float>& out)
+void UExcelField::SplitToFloat(const FString& Str, const FString& Delimiter, TArray<float>& out)
 {
 	out.Empty();
 
@@ -109,15 +109,15 @@ void UCsvField::SplitToFloat(const FString& Str, const FString& Delimiter, TArra
 
 //-----------------------------------------------------------------------------------------------------------------
 
-UCsvField*	UXmlToCsv::mField = nullptr;
-TMap<FString, UXmlToCsv*> UXmlToCsv::mmXmlToCsvs;
+UExcelField*	UExcelBasedXml::mField = nullptr;
+TMap<FString, UExcelBasedXml*> UExcelBasedXml::mmTables;
 
-UXmlToCsv::UXmlToCsv()
+UExcelBasedXml::UExcelBasedXml()
 	: mnCurrentRow(0), mnCol(0), mnRow(0)
 {
 }
 
-UXmlToCsv::~UXmlToCsv()
+UExcelBasedXml::~UExcelBasedXml()
 {
 }
 //
@@ -134,11 +134,11 @@ UXmlToCsv::~UXmlToCsv()
 //#endif  
 //}
 
-UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
+UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
 {
-	UXmlToCsv* pRetXmlToCsv = nullptr;
+	UExcelBasedXml* pRetXmlToCsv = nullptr;
 
-	UXmlToCsv** ppFind = mmXmlToCsvs.Find(szfilename);
+	UExcelBasedXml** ppFind = mmTables.Find(szfilename);
 	if (ppFind)
 		pRetXmlToCsv = *ppFind;
 	else
@@ -188,7 +188,7 @@ UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 			}
 
 			//保存行列数
-			pRetXmlToCsv = NewObject<UXmlToCsv>();
+			pRetXmlToCsv = NewObject<UExcelBasedXml>();
 			pRetXmlToCsv->AddToRoot();
 			pRetXmlToCsv->mnCol = nCol;
 			pRetXmlToCsv->mnRow = nRow - 1;
@@ -229,7 +229,7 @@ UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 
 		doc.Clear();
 
-		mmXmlToCsvs.Add(szfilename, pRetXmlToCsv);
+		mmTables.Add(szfilename, pRetXmlToCsv);
 
 		UE_LOG(LogTemp, Warning, TEXT("行:%d"), pRetXmlToCsv->mnRow);
 		UE_LOG(LogTemp, Warning, TEXT("列:%d"), pRetXmlToCsv->mnCol);
@@ -238,13 +238,13 @@ UXmlToCsv* UXmlToCsv::OpenXmlToCsv(const FString& szfilename)
 	return pRetXmlToCsv;
 }
 
-void UXmlToCsv::CloseXmlToCsv(const FString& szfilename)
+void UExcelBasedXml::CloseXmlTable(const FString& szfilename)
 {
-	UXmlToCsv** ppFind = mmXmlToCsvs.Find(szfilename);
+	UExcelBasedXml** ppFind = mmTables.Find(szfilename);
 	if (ppFind)
 	{
-		mmXmlToCsvs.Remove(szfilename);
-		UXmlToCsv* pFind = *ppFind;
+		mmTables.Remove(szfilename);
+		UExcelBasedXml* pFind = *ppFind;
 		pFind->mmFieldNames.Empty();
 		pFind->mvDatas.Empty();
 
@@ -257,14 +257,14 @@ void UXmlToCsv::CloseXmlToCsv(const FString& szfilename)
 	}
 }
 
-UCsvField* UXmlToCsv::FieldByName(const FString& szname)
+UExcelField* UExcelBasedXml::GetFieldByName(const FString& szname)
 {
 	int32* pnfind = mmFieldNames.Find(szname);
 	if (pnfind == nullptr) return NULL;
 
 	if (mField == nullptr)
 	{
-		mField = NewObject<UCsvField>();
+		mField = NewObject<UExcelField>();
 		mField->AddToRoot();
 	}
 	
@@ -272,13 +272,13 @@ UCsvField* UXmlToCsv::FieldByName(const FString& szname)
 	return mField;
 }
 
-bool UXmlToCsv::LocationByInt(const FString& szfield, int32 nval)
+bool UExcelBasedXml::LocateByInt(const FString& szfield, int32 nval)
 {
 	FString sztmp1 = FString::FromInt(nval);
-	return LocationByStr(szfield, sztmp1);
+	return LocateByStr(szfield, sztmp1);
 }
 
-bool UXmlToCsv::LocationByStr(const FString& szfield, const FString& szval)
+bool UExcelBasedXml::LocateByStr(const FString& szfield, const FString& szval)
 {
 	int32* pnfind = mmFieldNames.Find(szfield);
 	if (pnfind != nullptr)
@@ -304,7 +304,7 @@ bool UXmlToCsv::LocationByStr(const FString& szfield, const FString& szval)
 	return false;
 }
 
-bool UXmlToCsv::LocationByTwo(const FString& szfield1, const FString& szfield2, int32 nval1, int32 nval2)
+bool UExcelBasedXml::LocationByTwo(const FString& szfield1, const FString& szfield2, int32 nval1, int32 nval2)
 {
 	FString sztmp1 = FString::FromInt(nval1);
 	FString sztmp2 = FString::FromInt(nval2);
@@ -338,10 +338,10 @@ bool UXmlToCsv::LocationByTwo(const FString& szfield1, const FString& szfield2, 
 	return false;
 }
 
-bool UXmlToCsv::Eof() { return mnCurrentRow > mnRow; }
-int32  UXmlToCsv::GetTotalRow() { return mnRow; }
-int32  UXmlToCsv::GetCurrentRow() { return mnCurrentRow; }
-void UXmlToCsv::SetCurrentRow(int32 nno) 
+bool UExcelBasedXml::Eof() { return mnCurrentRow > mnRow; }
+int32  UExcelBasedXml::GetTotalRow() { return mnRow; }
+int32  UExcelBasedXml::GetCurrentRow() { return mnCurrentRow; }
+void UExcelBasedXml::SetCurrentRow(int32 nno) 
 {	
 	if (nno > 0 && nno <= this->mnRow)
 	{
@@ -353,6 +353,6 @@ void UXmlToCsv::SetCurrentRow(int32 nno)
 		UE_LOG(LogTemp, Error, TEXT("设置的Xml当前行不合法,所以回到第一行."));
 	}
 }
-void UXmlToCsv::First() { mnCurrentRow = 1; }
-void UXmlToCsv::Last() { if (mnCurrentRow <= mnRow) mnCurrentRow = mnRow; }
-void UXmlToCsv::Next() { if (mnCurrentRow < mnRow) mnCurrentRow++; }
+void UExcelBasedXml::First() { mnCurrentRow = 1; }
+void UExcelBasedXml::Last() { if (mnCurrentRow <= mnRow) mnCurrentRow = mnRow; }
+void UExcelBasedXml::Next() { if (mnCurrentRow < mnRow) mnCurrentRow++; }

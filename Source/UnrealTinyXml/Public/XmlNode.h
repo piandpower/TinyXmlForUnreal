@@ -3,14 +3,14 @@
 #pragma once
 #include "CoreUObject.h"
 #include "tinyxml2.h"
-#include "UnrealTinyXmlNode.generated.h"
+#include "XmlNode.generated.h"
 using namespace tinyxml2;
 
 /**
  *
  */
 UCLASS(BlueprintType)
-class UNREALTINYXML_API UUnrealTinyXmlNode : public UObject
+class UNREALTINYXML_API UXmlNode : public UObject
 {
 	GENERATED_BODY()
 public:
@@ -20,25 +20,25 @@ public:
 public:
 	bool IsValid();
 
-	static UUnrealTinyXmlNode* Create(TSharedPtr<XMLDocument> XmlFile, XMLNode* Node);
-	static UUnrealTinyXmlNode* Create(TSharedPtr<XMLDocument> XmlFile, const XMLNode* Node);
+	static UXmlNode* Create(TSharedPtr<XMLDocument> XmlFile, XMLNode* Node);
+	static UXmlNode* Create(TSharedPtr<XMLDocument> XmlFile, const XMLNode* Node);
 
 	/**
 	* Gets next (Step) node in a list of nodes, can return NULL.if exceeded,return last one.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
-		UUnrealTinyXmlNode* GetNextNode(int Step = 1);
+		UXmlNode* GetNextNode(int Step = 1);
 	/**
 	* Gets previous (Step) node in a list of nodes, can return NULL.if exceeded,return last one.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
-		UUnrealTinyXmlNode* GetPreviousNode(int Step = 1);
+		UXmlNode* GetPreviousNode(int Step = 1);
 
 	/**
 	* Gets the next node in a list of nodes, can return NULL.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
-		UUnrealTinyXmlNode* GetParentNode();
+		UXmlNode* GetParentNode();
 
 	/**
 	* Gets the value of the node.
@@ -50,13 +50,13 @@ public:
 	* Gets the first child of this node which can be iterated into with GetNextNode, can return NULL.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
-		UUnrealTinyXmlNode* GetFirstChildNode(const int SearchDeep = 1);
+		UXmlNode* GetFirstChildNode(const int SearchDeep = 1);
 
 	/**
 	* Find first(or "loc") child  node of this node which has the same name as "NameToSearch",Will return Null if can't find.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
-		UUnrealTinyXmlNode* FindChildNodeByName(const FString& NameToSearch, const int loc = 1);
+		UXmlNode* FindChildNodeByName(const FString& NameToSearch, const int loc = 1);
 
 	/**
 	* Gets the name of current node, can return NULL.
