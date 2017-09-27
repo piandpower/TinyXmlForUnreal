@@ -60,7 +60,15 @@ public:
 	* Open a Excel based xml file, must assign to an var, and must call close() after used.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|ExcelBasedXml")
-		static UExcelBasedXml* OpenXmlTable(const FString& szfilename);
+		static UExcelBasedXml* OpenXmlTable(const FString& szfilepath,const FString& szfilename);
+
+	/**
+	* Open a Excel based xml file from buffers, must assign to an var, and must call close() after used.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|ExcelBasedXml")
+		static UExcelBasedXml* OpenXmlTableFromBuffers(const TArray<uint8>& Buffers, const FString& szfilename);
+
+
 	/**
 	* Clear opened xml file.
 	*/

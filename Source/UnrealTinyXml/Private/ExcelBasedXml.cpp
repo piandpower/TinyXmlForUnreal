@@ -126,96 +126,186 @@ void UExcelBasedXml::InitProperties(const FString& rootDir)
 	UExcelBasedXml::xmlRootDir = rootDir;
 }
 
-UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilename)
+UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilepath,const FString& szfilename)
 {
 	UExcelBasedXml* pRetXmlToCsv = nullptr;
 
 	UExcelBasedXml** ppFind = mmTables.Find(szfilename);
 	if (ppFind)
-		pRetXmlToCsv = *ppFind;
-	else
 	{
-		XMLDocument doc;
-		FString path = FPaths::GameContentDir() + szfilename;
-
-
+		pRetXmlToCsv = *ppFind;
+		return pRetXmlToCsv;
+	}
 		
-		doc.LoadFile(TCHAR_TO_UTF8(*path));
-		if (doc.Error()) return pRetXmlToCsv;
+	XMLDocument doc;
+	FString path = FPaths::GameContentDir() + szfilepath + szfilename;
+		
+	doc.LoadFile(TCHAR_TO_UTF8(*path));
+	if (doc.Error()) return pRetXmlToCsv;
 
-		const char* WORKSHEET = "Worksheet";
-		const char* TABLE = "Table";
-		const char* ROW = "Row";
-		const char* CELL = "Cell";
-		const char* DATA = "Data";
+	const char* WORKSHEET = "Worksheet";
+	const char* TABLE = "Table";
+	const char* ROW = "Row";
+	const char* CELL = "Cell";
+	const char* DATA = "Data";
 
-		XMLElement* pTable = doc.RootElement()->FirstChildElement(WORKSHEET)->FirstChildElement(TABLE);
+	XMLElement* pTable = doc.RootElement()->FirstChildElement(WORKSHEET)->FirstChildElement(TABLE);
 
-		int nRow = 0;
+	int nRow = 0;
 
-		for (XMLElement* pRow = pTable->FirstChildElement(ROW); pRow; pRow = pRow->NextSiblingElement(ROW))
+	for (XMLElement* pRow = pTable->FirstChildElement(ROW); pRow; pRow = pRow->NextSiblingElement(ROW))
+	{
+		nRow++;
+	}
+
+
+	if (nRow > 1)
+	{
+		XMLElement* pRow = pTable->FirstChildElement(ROW);
+
+		int nCol = 0;
+
+		for (XMLElement* pCell = pRow->FirstChildElement(CELL); pCell; pCell = pCell->NextSiblingElement(CELL))
 		{
-			nRow++;
+			nCol++;
 		}
 
+		pRetXmlToCsv = NewObject<UExcelBasedXml>();
+		//Add to root to prevent grab collection.
+		pRetXmlToCsv->AddToRoot();
+		pRetXmlToCsv->mnCol = nCol;
+		//Fill rows(exclude first row which is field row.)
+		pRetXmlToCsv->mnRow = nRow - 1;
+		//Init data array.
+		pRetXmlToCsv->mvDatas.Empty(nCol * nRow);
+		pRetXmlToCsv->mvDatas.AddDefaulted(nCol * nRow);
 
-		if (nRow > 1)
+		int ntmpRow = 0;
+		for (; pRow; pRow = pRow->NextSiblingElement(ROW))
 		{
-			XMLElement* pRow = pTable->FirstChildElement(ROW);
-
-			int nCol = 0;
-
+			int ntmpPos = 0;
 			for (XMLElement* pCell = pRow->FirstChildElement(CELL); pCell; pCell = pCell->NextSiblingElement(CELL))
 			{
-				nCol++;
-			}
-
-			pRetXmlToCsv = NewObject<UExcelBasedXml>();
-			//Add to root to prevent grab collection.
-			pRetXmlToCsv->AddToRoot();
-			pRetXmlToCsv->mnCol = nCol;
-			//Fill rows(exclude first row which is field row.)
-			pRetXmlToCsv->mnRow = nRow - 1;
-			//Init data array.
-			pRetXmlToCsv->mvDatas.Empty(nCol * nRow);
-			pRetXmlToCsv->mvDatas.AddDefaulted(nCol * nRow);
-
-			int ntmpRow = 0;
-			for (; pRow; pRow = pRow->NextSiblingElement(ROW))
-			{
-				int ntmpPos = 0;
-				for (XMLElement* pCell = pRow->FirstChildElement(CELL); pCell; pCell = pCell->NextSiblingElement(CELL))
+				if (int newPos = pCell->IntAttribute("ss:Index"))
 				{
-					if (int newPos = pCell->IntAttribute("ss:Index"))
-					{
-						ntmpPos += newPos - ntmpPos - 1;
-					}
-					
-					XMLElement* pData = pCell->FirstChildElement(DATA);
-					if (pData)
-						pRetXmlToCsv->mvDatas[ntmpRow*nCol + ntmpPos] = UTF8_TO_TCHAR(pData->GetText());
-					ntmpPos++;
-					if (ntmpPos > nCol) break;
+					ntmpPos += newPos - ntmpPos - 1;
 				}
-				ntmpRow++;
-				if (ntmpRow > nRow) break;
+					
+				XMLElement* pData = pCell->FirstChildElement(DATA);
+				if (pData)
+					pRetXmlToCsv->mvDatas[ntmpRow*nCol + ntmpPos] = UTF8_TO_TCHAR(pData->GetText());
+				ntmpPos++;
+				if (ntmpPos > nCol) break;
 			}
-
-			for (int i = 0; i < pRetXmlToCsv->mnCol; i++)
-			{
-				pRetXmlToCsv->mmFieldNames.Add(pRetXmlToCsv->mvDatas[i], i);
-			}
-
-			pRetXmlToCsv->mnCurrentRow = 1;
+			ntmpRow++;
+			if (ntmpRow > nRow) break;
 		}
 
-		doc.Clear();
+		for (int i = 0; i < pRetXmlToCsv->mnCol; i++)
+		{
+			pRetXmlToCsv->mmFieldNames.Add(pRetXmlToCsv->mvDatas[i], i);
+		}
 
-		mmTables.Add(szfilename, pRetXmlToCsv);
-
+		pRetXmlToCsv->mnCurrentRow = 1;
 	}
-	
+
+	doc.Clear();
+
+	mmTables.Add(szfilename, pRetXmlToCsv);
 	return pRetXmlToCsv;
+
+	
+	
+}
+
+UExcelBasedXml* UExcelBasedXml::OpenXmlTableFromBuffers(const TArray<uint8>& Buffers, const FString& szfilename)
+{
+	UExcelBasedXml* pRetXmlToCsv = nullptr;
+
+	UExcelBasedXml** ppFind = mmTables.Find(szfilename);
+	if (ppFind)
+	{
+		pRetXmlToCsv = *ppFind;
+		return pRetXmlToCsv;
+	}
+
+	XMLDocument doc;
+
+	doc.Parse((char*)&Buffers[0], Buffers.Num());
+	if (doc.Error()) return pRetXmlToCsv;
+
+	const char* WORKSHEET = "Worksheet";
+	const char* TABLE = "Table";
+	const char* ROW = "Row";
+	const char* CELL = "Cell";
+	const char* DATA = "Data";
+
+	XMLElement* pTable = doc.RootElement()->FirstChildElement(WORKSHEET)->FirstChildElement(TABLE);
+
+	int nRow = 0;
+
+	for (XMLElement* pRow = pTable->FirstChildElement(ROW); pRow; pRow = pRow->NextSiblingElement(ROW))
+	{
+		nRow++;
+	}
+
+
+	if (nRow > 1)
+	{
+		XMLElement* pRow = pTable->FirstChildElement(ROW);
+
+		int nCol = 0;
+
+		for (XMLElement* pCell = pRow->FirstChildElement(CELL); pCell; pCell = pCell->NextSiblingElement(CELL))
+		{
+			nCol++;
+		}
+
+		pRetXmlToCsv = NewObject<UExcelBasedXml>();
+		//Add to root to prevent grab collection.
+		pRetXmlToCsv->AddToRoot();
+		pRetXmlToCsv->mnCol = nCol;
+		//Fill rows(exclude first row which is field row.)
+		pRetXmlToCsv->mnRow = nRow - 1;
+		//Init data array.
+		pRetXmlToCsv->mvDatas.Empty(nCol * nRow);
+		pRetXmlToCsv->mvDatas.AddDefaulted(nCol * nRow);
+
+		int ntmpRow = 0;
+		for (; pRow; pRow = pRow->NextSiblingElement(ROW))
+		{
+			int ntmpPos = 0;
+			for (XMLElement* pCell = pRow->FirstChildElement(CELL); pCell; pCell = pCell->NextSiblingElement(CELL))
+			{
+				if (int newPos = pCell->IntAttribute("ss:Index"))
+				{
+					ntmpPos += newPos - ntmpPos - 1;
+				}
+
+				XMLElement* pData = pCell->FirstChildElement(DATA);
+				if (pData)
+					pRetXmlToCsv->mvDatas[ntmpRow*nCol + ntmpPos] = UTF8_TO_TCHAR(pData->GetText());
+				ntmpPos++;
+				if (ntmpPos > nCol) break;
+			}
+			ntmpRow++;
+			if (ntmpRow > nRow) break;
+		}
+
+		for (int i = 0; i < pRetXmlToCsv->mnCol; i++)
+		{
+			pRetXmlToCsv->mmFieldNames.Add(pRetXmlToCsv->mvDatas[i], i);
+		}
+
+		pRetXmlToCsv->mnCurrentRow = 1;
+	}
+
+	doc.Clear();
+
+	mmTables.Add(szfilename, pRetXmlToCsv);
+	return pRetXmlToCsv;
+
+
 }
 
 void UExcelBasedXml::CloseXmlTable(const FString& szfilename)
