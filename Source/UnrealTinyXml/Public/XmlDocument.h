@@ -20,15 +20,16 @@ public:
 	bool IsValid();
 
 	/**
-	* Create a instance of TinyXmlDocument which can load xml,or close xml.
-	*/
-	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml", Meta = (DisplayName = "Create New XmlDocument"))
-		static UXmlDocument* NewXmlDocument();
-	/**
-	* Load xml file from disk, return ture if load successful, or it will be false.
+	* Open a xml file from disk.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml")
-		bool LoadXmlFie(const FString& File);
+		static UXmlDocument* OpenXml(const FString& XmlPath);
+
+	/**
+	* Open a xml file from buffers.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml")
+		static UXmlDocument* OpenXmlFromBuffers(const TArray<uint8>& Buffers);
 
 	/**
 	* Get the root node of current loaded xml file, returns NULL if it can't be parsed.
