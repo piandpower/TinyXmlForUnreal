@@ -20,6 +20,12 @@ public:
 	bool IsValid();
 
 	/**
+	* Create a empty TinyXmlDocument which can add node and save to disk.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml")
+		static UXmlDocument* CreateXml();
+
+	/**
 	* Open a xml file from disk.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml")
@@ -30,6 +36,18 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml")
 		static UXmlDocument* OpenXmlFromBuffers(const TArray<uint8>& Buffers);
+
+	/**
+	* Save xml file, return ture if load successful, or it will be false.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml")
+		bool SaveXmlFie(const FString& File);
+
+	/**
+	* Create the root node of current loaded xml file, returns NULL if it can't succeed.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Xml")
+		UXmlNode* CreateRootNode(const FString& RootName);
 
 	/**
 	* Get the root node of current loaded xml file, returns NULL if it can't be parsed.

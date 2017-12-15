@@ -15,13 +15,24 @@ class UNREALTINYXML_API UXmlNode : public UObject
 	GENERATED_BODY()
 public:
 	TSharedPtr<XMLDocument> XmlFile; // keeps everything in memory
-	const XMLNode* Node = NULL;
+	XMLNode* Node = NULL;
 
 public:
 	bool IsValid();
 
 	static UXmlNode* Create(TSharedPtr<XMLDocument> XmlFile, XMLNode* Node);
-	static UXmlNode* Create(TSharedPtr<XMLDocument> XmlFile, const XMLNode* Node);
+
+	/**
+	* Add child node to current node at last.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
+		UXmlNode* AddChildNode(const FString& ChildName);
+
+	/**
+	* Clear all child node.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
+		void RomoveAllChild();
 
 	/**
 	* Gets next (Step) node in a list of nodes, can return NULL.if exceeded,return last one.
@@ -59,10 +70,58 @@ public:
 		UXmlNode* FindChildNodeByName(const FString& NameToSearch, const int loc = 1);
 
 	/**
+	* By index to location child node
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
+		UXmlNode* GetChildNodeByIndex(int32 Index);
+
+	/**
 	* Gets the name of current node, can return NULL.
 	*/
 	UFUNCTION(BlueprintPure, Category = "UnrealTinyXml|Node")
 		FString GetNodeName();
+
+	/**
+	* Set a bool value for attribute name
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
+		void SetAttributeBool(const FString& AttributeName, bool AttributeValue);
+
+	/**
+	* Set a int value for attribute name
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
+		void SetAttributeInt(const FString& AttributeName, int32 AttributeValue);
+
+	/**
+	* Set a float value for attribute name
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
+		void SetAttributeFloat(const FString& AttributeName, float AttributeValue);
+
+	/**
+	* Set a string value for attribute name
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UnrealTinyXml|Node")
+		void SetAttributeString(const FString& AttributeName, const FString& AttributeValue);
+
+	/**
+	* Given an attribute name,returns bool value or null
+	*/
+	UFUNCTION(BlueprintPure, Category = "UnrealTinyXml|Node")
+		bool GetAttributeBool(const FString& AttributeName);
+
+	/**
+	* Given an attribute name,returns int value or null
+	*/
+	UFUNCTION(BlueprintPure, Category = "UnrealTinyXml|Node")
+		int32 GetAttributeInt(const FString& AttributeName);
+
+	/**
+	* Given an attribute name,returns float value or null
+	*/
+	UFUNCTION(BlueprintPure, Category = "UnrealTinyXml|Node")
+		float GetAttributeFloat(const FString& AttributeName);
 
 	/**
 	* Given an attribute name,returns the value
@@ -70,5 +129,5 @@ public:
 		exists
 	*/
 	UFUNCTION(BlueprintPure, Category = "UnrealTinyXml|Node")
-		FString GetAttributeValue(const FString& AttributeName);
+		FString GetAttributeString(const FString& AttributeName);
 };

@@ -11,24 +11,25 @@ bool UXmlDocument::IsValid()
 }
 
 
+UXmlDocument* UXmlDocument::CreateXml()
+{
+	UXmlDocument* Instance = NewObject<UXmlDocument>();
+	Instance->XmlFilePtr = new tinyxml2::XMLDocument();
+	return Instance;
+}
+
 UXmlDocument* UXmlDocument::OpenXml(const FString& XmlPath)
 {
-	//获取Xml文件路径
 	FString Path = FPaths::GameContentDir() + XmlPath;
 
-	//检查文件是否存在
 	if (!(FPaths::FileExists(Path)))
 	{
 		return nullptr;
 	}
 
-	//创建Node
-	UXmlDocument* Instance = NewObject<UXmlDocument>();
-	Instance->XmlFilePtr = new tinyxml2::XMLDocument();
+	UXmlDocument* Instance = CreateXml();
 
-	//读取文件
 	Instance->XmlFilePtr->LoadFile(TCHAR_TO_UTF8(*Path));
-	//检测Xml文件解析是否包含错误
 	if (Instance->XmlFilePtr->Error())
 	{
 		if (Instance->IsValidLowLevel())
@@ -49,8 +50,7 @@ UXmlDocument* UXmlDocument::OpenXmlFromBuffers(const TArray<uint8>& Buffers)
 	}
 
 	//创建Node
-	UXmlDocument* Instance = NewObject<UXmlDocument>();
-	Instance->XmlFilePtr = new tinyxml2::XMLDocument();
+	UXmlDocument* Instance = CreateXml();
 
 	//读取文件
 	Instance->XmlFilePtr->Parse((char*)&Buffers[0], Buffers.Num());
@@ -68,6 +68,36 @@ UXmlDocument* UXmlDocument::OpenXmlFromBuffers(const TArray<uint8>& Buffers)
 
 }
 
+
+bool UXmlDocument::SaveXmlFie(const FString& File)
+{
+	this->XmlFilePtr->SaveFile(TCHAR_TO_UTF8(*File));
+	if (XmlFilePtr->Error())
+	{
+		return false;
+	}
+	return true;
+}
+
+UXmlNode* UXmlDocument::CreateRootNode(const FString& RootName)
+{
+	if (!IsValid())
+	{
+		return nullptr;
+	}
+
+	//Create根结点
+	tinyxml2::XMLNode* RootNode = XmlFilePtr->NewElement(TCHAR_TO_UTF8(*RootName));
+
+	//检查错误
+	if (RootNode == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<XMLDocument> XmlFile = MakeShareable(XmlFilePtr);
+	return UXmlNode::Create(XmlFile, RootNode);
+}
 
 UXmlNode* UXmlDocument::GetRootNode()
 {

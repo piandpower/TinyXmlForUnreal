@@ -20,30 +20,45 @@ UXmlNode* UXmlNode::Create(TSharedPtr<XMLDocument> XmlFile, XMLNode* Node)
 	return Instance;
 }
 
-UXmlNode* UXmlNode::Create(TSharedPtr<XMLDocument> XmlFile, const XMLNode* Node)
+
+UXmlNode* UXmlNode::AddChildNode(const FString& ChildName)
 {
-	//创建Node
-	UXmlNode* Instance = NewObject<UXmlNode>();
-	Instance->XmlFile = XmlFile;
-	Instance->Node = Node;
-	return Instance;
+	if (!IsValid())
+	{
+		return nullptr;
+	}
+
+	XMLElement* RetNode = Node->GetDocument()->NewElement(TCHAR_TO_UTF8(*ChildName));
+	Node->InsertEndChild(RetNode);
+
+	if (RetNode == nullptr)
+		return nullptr;
+
+	return UXmlNode::Create(XmlFile, RetNode);
+}
+
+void UXmlNode::RomoveAllChild()
+{
+	if (!IsValid())
+	{
+		return;
+	}
+
+	Node->DeleteChildren();
 }
 
 UXmlNode* UXmlNode::GetNextNode(int Step /*= 1*/)
 {
-	//检查错误
 	if (!IsValid() || Step <= 0)
 	{
 		return NULL;
 	}
 
-	//找到下一个
-	const XMLNode* NextNode = Node->NextSibling();
+	XMLNode* NextNode = Node->NextSibling();
 
 	if (NextNode == nullptr)
 		return NULL;
 
-	//如果要找不止一个,则继续找
 	if (Step > 1)
 	{
 		for (int i = 2; i <= Step; i++)
@@ -52,27 +67,24 @@ UXmlNode* UXmlNode::GetNextNode(int Step /*= 1*/)
 				break;
 			NextNode = NextNode->NextSibling();
 		}
-		return UXmlNode::Create(XmlFile, NextNode);
 	}
-	else
-		return UXmlNode::Create(XmlFile, NextNode);
+
+	return UXmlNode::Create(XmlFile, NextNode);
 }
 
 
 UXmlNode* UXmlNode::GetPreviousNode(int Step /*= 1*/)
 {
-	//检查错误
 	if (!IsValid() || Step <= 0)
 	{
 		return NULL;
 	}
 
-	//找到下一个
-	const XMLNode* NextNode = Node->PreviousSibling();
+	XMLNode* NextNode = Node->PreviousSibling();
 
 	if (NextNode == nullptr)
 		return NULL;
-	//如果要找不止一个,则继续找
+
 	if (Step > 1)
 	{
 		for (int i = 2; i <= Step; i++)
@@ -81,10 +93,8 @@ UXmlNode* UXmlNode::GetPreviousNode(int Step /*= 1*/)
 				break;
 			NextNode = NextNode->PreviousSibling();
 		}
-		return UXmlNode::Create(XmlFile, NextNode);
 	}
-	else
-		return UXmlNode::Create(XmlFile, NextNode);
+	return UXmlNode::Create(XmlFile, NextNode);
 }
 
 UXmlNode* UXmlNode::GetParentNode()
@@ -93,7 +103,7 @@ UXmlNode* UXmlNode::GetParentNode()
 	{
 		return NULL;
 	}
-	const XMLNode* ParentNode = Node->Parent();
+	XMLNode* ParentNode = Node->Parent();
 	if (ParentNode == nullptr)
 	{
 		return NULL;
@@ -117,7 +127,7 @@ UXmlNode* UXmlNode::GetFirstChildNode(const int SearchDeep)
 	{
 		return NULL;
 	}
-	const XMLNode* FirstChild = Node->FirstChild();
+	XMLNode* FirstChild = Node->FirstChild();
 	int counter = 1;
 	while (counter < SearchDeep)
 	{
@@ -138,7 +148,7 @@ UXmlNode* UXmlNode::FindChildNodeByName(const FString& NameToSearch, const int l
 	{
 		return NULL;
 	}
-	const XMLNode* TempNode = Node->FirstChild();
+	XMLNode* TempNode = Node->FirstChild();
 	if (TempNode == nullptr)
 		return nullptr;
 
@@ -159,6 +169,24 @@ UXmlNode* UXmlNode::FindChildNodeByName(const FString& NameToSearch, const int l
 
 }
 
+UXmlNode* UXmlNode::GetChildNodeByIndex(int32 Index)
+{
+	if (!IsValid())
+	{
+		return nullptr;
+	}
+
+	int counter = 0;
+
+	for (XMLNode* TempNode = Node->FirstChild(); TempNode != nullptr; TempNode = TempNode->NextSibling(), counter++)
+	{
+		if (counter >= Index)
+			return UXmlNode::Create(XmlFile, TempNode);
+	}
+
+	return nullptr;
+}
+
 FString UXmlNode::GetNodeName()
 {
 	if (!IsValid())
@@ -168,7 +196,76 @@ FString UXmlNode::GetNodeName()
 	return UTF8_TO_TCHAR(Node->ToElement()->Name());
 }
 
-FString UXmlNode::GetAttributeValue(const FString& AttributeName)
+void UXmlNode::SetAttributeBool(const FString& AttributeName, bool AttributeValue)
+{
+	if (!IsValid())
+	{
+		return;
+	}
+	Node->ToElement()->SetAttribute(TCHAR_TO_UTF8(*AttributeName), AttributeValue);
+}
+
+void UXmlNode::SetAttributeInt(const FString& AttributeName, int32 AttributeValue)
+{
+	if (!IsValid())
+	{
+		return;
+	}
+
+	Node->ToElement()->SetAttribute(TCHAR_TO_UTF8(*AttributeName), AttributeValue);
+}
+
+void UXmlNode::SetAttributeFloat(const FString& AttributeName, float AttributeValue)
+{
+	if (!IsValid())
+	{
+		return;
+	}
+
+	Node->ToElement()->SetAttribute(TCHAR_TO_UTF8(*AttributeName), AttributeValue);
+}
+
+void UXmlNode::SetAttributeString(const FString& AttributeName, const FString& AttributeValue)
+{
+	if (!IsValid())
+	{
+		return;
+	}
+
+	Node->ToElement()->SetAttribute(TCHAR_TO_UTF8(*AttributeName), TCHAR_TO_UTF8(*AttributeValue));
+}
+
+bool UXmlNode::GetAttributeBool(const FString& AttributeName)
+{
+	if (!IsValid())
+	{
+		return false;
+	}
+
+	return Node->ToElement()->BoolAttribute(TCHAR_TO_UTF8(*AttributeName));
+}
+
+int32 UXmlNode::GetAttributeInt(const FString& AttributeName)
+{
+	if (!IsValid())
+	{
+		return 0;
+	}
+
+	return Node->ToElement()->IntAttribute(TCHAR_TO_UTF8(*AttributeName));
+}
+
+float UXmlNode::GetAttributeFloat(const FString& AttributeName)
+{
+	if (!IsValid())
+	{
+		return 0.0f;
+	}
+
+	return Node->ToElement()->FloatAttribute(TCHAR_TO_UTF8(*AttributeName));
+}
+
+FString UXmlNode::GetAttributeString(const FString& AttributeName)
 {
 	if (!IsValid())
 	{
