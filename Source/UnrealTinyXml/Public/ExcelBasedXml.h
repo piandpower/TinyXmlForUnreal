@@ -1,6 +1,6 @@
 
 #pragma once
-
+#include "CoreMinimal.h"
 #include "ExcelBasedXml.generated.h"
 
 UCLASS()

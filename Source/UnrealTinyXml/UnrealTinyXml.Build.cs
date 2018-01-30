@@ -6,8 +6,9 @@ public class UnrealTinyXml : ModuleRules
 {
 	public UnrealTinyXml(ReadOnlyTargetRules Target):base(Target)
 	{
-		
-		PublicIncludePaths.AddRange(
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicIncludePaths.AddRange(
 			new string[] {
 				"UnrealTinyXml/Public"
 				

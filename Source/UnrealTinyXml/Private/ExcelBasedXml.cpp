@@ -1,5 +1,5 @@
-#include "UnrealTinyXmlPrivatePCH.h"
 #include "ExcelBasedXml.h"
+#include "Paths.h"
 #include "tinyxml2.h"
 #include <string>
 
@@ -109,7 +109,7 @@ void UExcelField::SplitToFloat(const FString& Str, const FString& Delimiter, TAr
 
 UExcelField*	UExcelBasedXml::mField = nullptr;
 TMap<FString, UExcelBasedXml*> UExcelBasedXml::mmTables;
-FString UExcelBasedXml::xmlRootDir = FPaths::GameContentDir();
+FString UExcelBasedXml::xmlRootDir = FPaths::ProjectContentDir();
 
 UExcelBasedXml::UExcelBasedXml()
 	: mnCurrentRow(0), mnCol(0), mnRow(0)
@@ -138,7 +138,7 @@ UExcelBasedXml* UExcelBasedXml::OpenXmlTable(const FString& szfilepath,const FSt
 	}
 		
 	XMLDocument doc;
-	FString path = FPaths::GameContentDir() + szfilepath + szfilename;
+	FString path = FPaths::ProjectContentDir() + szfilepath + szfilename;
 		
 	doc.LoadFile(TCHAR_TO_UTF8(*path));
 	if (doc.Error()) return pRetXmlToCsv;

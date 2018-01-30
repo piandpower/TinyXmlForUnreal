@@ -1,6 +1,6 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
-#include "UnrealTinyXmlPrivatePCH.h"
+#include "UnrealTinyXml.h"
 #define LOCTEXT_NAMESPACE "FUnrealTinyXmlModule"
 
 void FUnrealTinyXmlModule::StartupModule()

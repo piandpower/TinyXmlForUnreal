@@ -1,10 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UnrealTinyXmlPrivatePCH.h"
 #include "XmlNode.h"
-
-
-
 
 bool UXmlNode::IsValid()
 {

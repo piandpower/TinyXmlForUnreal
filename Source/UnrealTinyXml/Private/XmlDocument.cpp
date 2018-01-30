@@ -1,10 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UnrealTinyXmlPrivatePCH.h"
 #include "XmlDocument.h"
-
-
-
+#include "XmlNode.h"
 bool UXmlDocument::IsValid()
 {
 	return this->XmlFilePtr != nullptr;
@@ -20,7 +17,7 @@ UXmlDocument* UXmlDocument::CreateXml()
 
 UXmlDocument* UXmlDocument::OpenXml(const FString& XmlPath)
 {
-	FString Path = FPaths::GameContentDir() + XmlPath;
+	FString Path = FPaths::ProjectContentDir() + XmlPath;
 
 	if (!(FPaths::FileExists(Path)))
 	{
