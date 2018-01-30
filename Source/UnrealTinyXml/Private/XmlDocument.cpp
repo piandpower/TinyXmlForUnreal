@@ -2,6 +2,7 @@
 
 #include "XmlDocument.h"
 #include "XmlNode.h"
+#include "Paths.h"
 bool UXmlDocument::IsValid()
 {
 	return this->XmlFilePtr != nullptr;
@@ -46,12 +47,12 @@ UXmlDocument* UXmlDocument::OpenXmlFromBuffers(const TArray<uint8>& Buffers)
 		return nullptr;
 	}
 
-	//´´½¨Node
+	//ï¿½ï¿½ï¿½ï¿½Node
 	UXmlDocument* Instance = CreateXml();
 
-	//¶ÁÈ¡ÎÄ¼þ
+	//ï¿½ï¿½È¡ï¿½Ä¼ï¿½
 	Instance->XmlFilePtr->Parse((char*)&Buffers[0], Buffers.Num());
-	//¼ì²âXmlÎÄ¼þ½âÎöÊÇ·ñ°üº¬´íÎó
+	//ï¿½ï¿½ï¿½Xmlï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (Instance->XmlFilePtr->Error())
 	{
 		if (Instance->IsValidLowLevel())
@@ -83,10 +84,10 @@ UXmlNode* UXmlDocument::CreateRootNode(const FString& RootName)
 		return nullptr;
 	}
 
-	//Create¸ù½áµã
+	//Createï¿½ï¿½ï¿½ï¿½ï¿½
 	tinyxml2::XMLNode* RootNode = XmlFilePtr->NewElement(TCHAR_TO_UTF8(*RootName));
 
-	//¼ì²é´íÎó
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (RootNode == nullptr)
 	{
 		return nullptr;
@@ -102,10 +103,10 @@ UXmlNode* UXmlDocument::GetRootNode()
 	{
 		return nullptr;
 	}
-	//»ñÈ¡¸ù½áµã
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½
 	tinyxml2::XMLNode* RootNode = XmlFilePtr->RootElement();
 
-	//¼ì²é´íÎó
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (RootNode == nullptr)
 	{
 		return nullptr;
